@@ -1,4 +1,5 @@
 import { useCallback, useContext } from "react"
+import { changeCacheParams } from "src/utils/types"
 import { AppContext } from "../utils/context"
 import { fakeFetch, RegisteredEndpoints } from "../utils/fetch"
 import { useWrappedRequest } from "./useWrappedRequest"
@@ -27,6 +28,33 @@ export function useCustomFetch() {
       }),
     [cache, wrappedRequest]
   )
+
+  const updateCacheWhenChecked = (endpoint: RegisteredEndpoints, params: changeCacheParams) => {
+    if (endpoint === "setTransactionApproval") {
+      const itemId = params.transactionId
+      const cacheKey1 = getCacheKey("transactionsByEmployee", { employeeId: params.employeeId })
+
+      for (const [key, value] of cache?.current) {
+        if (key.includes("paginatedTransactions")) {
+          const data = JSON.parse(value)
+          const index = data.data.findIndex((item: any) => item.id === itemId)
+          if (index !== -1) {
+            data.data[index].approved = params.value
+            cache?.current.set(key, JSON.stringify(data))
+          }
+        }
+      }
+      console.log("cacheKey1", cacheKey1)
+      if (cache?.current.has(cacheKey1)) {
+        const data = JSON.parse(cache?.current.get(cacheKey1))
+        const index = data.findIndex((item: any) => item.id === itemId)
+        if (index !== -1) {
+          data[index].approved = params.value
+          cache?.current.set(cacheKey1, JSON.stringify(data))
+        }
+      }
+    }
+  }
 
   const fetchWithoutCache = useCallback(
     async <TData, TParams extends object = object>(
@@ -67,7 +95,14 @@ export function useCustomFetch() {
     [cache]
   )
 
-  return { fetchWithCache, fetchWithoutCache, clearCache, clearCacheByEndpoint, loading }
+  return {
+    fetchWithCache,
+    updateCacheWhenChecked,
+    fetchWithoutCache,
+    clearCache,
+    clearCacheByEndpoint,
+    loading,
+  }
 }
 
 function getCacheKey(endpoint: RegisteredEndpoints, params?: object) {

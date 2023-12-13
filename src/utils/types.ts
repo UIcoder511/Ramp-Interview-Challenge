@@ -30,3 +30,9 @@ export type SetTransactionApprovalParams = {
   transactionId: string
   value: boolean
 }
+
+export type changeCacheParams = {
+  employeeId: string
+  transactionId: string
+  value: boolean
+}

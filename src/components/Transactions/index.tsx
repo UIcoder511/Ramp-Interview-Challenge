@@ -5,13 +5,19 @@ import { TransactionPane } from "./TransactionPane"
 import { SetTransactionApprovalFunction, TransactionsComponent } from "./types"
 
 export const Transactions: TransactionsComponent = ({ transactions }) => {
-  const { fetchWithoutCache, fetchWithCache, loading } = useCustomFetch()
+  const { fetchWithoutCache, loading, updateCacheWhenChecked } = useCustomFetch()
 
   const setTransactionApproval = useCallback<SetTransactionApprovalFunction>(
-    async ({ transactionId, newValue }) => {
-      await fetchWithCache<void, SetTransactionApprovalParams>("setTransactionApproval", {
+    async ({ transactionId, newValue, employeeId }) => {
+      await fetchWithoutCache<void, SetTransactionApprovalParams>("setTransactionApproval", {
         transactionId,
         value: newValue,
+      })
+
+      updateCacheWhenChecked("setTransactionApproval", {
+        transactionId,
+        value: newValue,
+        employeeId,
       })
     },
     [fetchWithoutCache]

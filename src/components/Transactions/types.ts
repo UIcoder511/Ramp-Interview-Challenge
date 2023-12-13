@@ -4,6 +4,7 @@ import { Transaction } from "../../utils/types"
 export type SetTransactionApprovalFunction = (params: {
   transactionId: string
   newValue: boolean
+  employeeId: string
 }) => Promise<void>
 
 type TransactionsProps = { transactions: Transaction[] | null }
